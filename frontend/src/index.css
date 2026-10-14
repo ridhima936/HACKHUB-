@@ -1,0 +1,40 @@
+.dashboard {
+    min-height: 100vh;
+    padding: 40px;
+    text-align: center;
+}
+
+.dashboard h1 {
+    font-size: 40px;
+    margin-bottom: 40px;
+}
+
+.dashboard h2 {
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.dashboard p {
+    color: #666;
+    margin-bottom: 40px;
+}
+
+.dashboard-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.dashboard-buttons button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    background-color: #000;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.dashboard-buttons button:hover {
+    background-color: #333;
+}
