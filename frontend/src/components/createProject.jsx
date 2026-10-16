@@ -9,7 +9,6 @@ function CreateProject({ onBack }) {
 
     const handleCreate = async (e) => {
         e.preventDefault();
-
         try {
             const token = localStorage.getItem("token");
 
@@ -34,6 +33,7 @@ function CreateProject({ onBack }) {
             setCategory("");
 
         } catch (error) {
+            console.log("CREATE PROJECT ERROR:", error.response?.data);
             setMessage(
                 error.response?.data?.message ||
                 "Failed to create project"

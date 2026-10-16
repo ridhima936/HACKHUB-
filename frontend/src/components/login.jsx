@@ -6,6 +6,7 @@ function Login({ onRegister, onLoginSuccess }) {
     const [message, setMessage] = useState("");
     const handleLogin = async (e) => {
         e.preventDefault();
+        console.log("LOGIN BUTTON CLICKED");
         try {
             const response = await api.post("/auth/login", {
                 email,
