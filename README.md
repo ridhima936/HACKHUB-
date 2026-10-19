@@ -23,12 +23,14 @@
 |---|---|
 | 💻 **Repository** | [github.com/ridhima936/HACKHUB-](https://github.com/ridhima936/HACKHUB-) |
 | 🐛 **Report a bug** | [github.com/ridhima936/HACKHUB-/issues](https://github.com/ridhima936/HACKHUB-/issues) |
-| 🖥️ **API base URL** | `http://localhost:5000/api` (local) — see [Deployment](#-deployment) to host it |
-| 🔗 **Live demo** | [frontend-three-orpin-83.vercel.app](https://frontend-three-orpin-83.vercel.app) (frontend on Vercel) |
+| 🖥️ **API base URL** | `http://localhost:5000/api` (local) · `https://hackhub-api-86m6.onrender.com/api` (live) |
+| 🔗 **Live demo** | [frontend-three-orpin-83.vercel.app](https://frontend-three-orpin-83.vercel.app) |
 
-> The frontend is deployed. `VITE_API_URL` points at the backend host, so the API
-> needs to be deployed too before the live site can load data — see
-> [Deployment](#-deployment).
+> The frontend runs on Vercel and the API on Render (Docker). Both are live —
+> open the demo and try the **Hackathon Archives → skill search** flow.
+
+> **Free-tier note:** the Render instance sleeps after 15 minutes idle, so the
+> first request after a pause can take ~30 seconds to wake up.
 
 > **Run it locally in 60 seconds**
 >
@@ -320,7 +322,8 @@ A useful smoke run:
 ### Backend → Render (Docker blueprint)
 
 The repo includes `render.yaml`, which tells Render to build the **Dockerfile** on the
-free plan.
+free plan. This is how the live API at
+`https://hackhub-api-86m6.onrender.com` is deployed.
 
 1. Go to [render.com](https://render.com) → **New → Blueprint** and pick
    `ridhima936/HACKHUB-`.
@@ -328,19 +331,20 @@ free plan.
    - `MONGO_URI` — your Atlas connection string
    - `CLIENT_URL` — `https://frontend-three-orpin-83.vercel.app`
      (add other origins comma-separated if needed)
-3. Deploy. The service comes up at
-   `https://<service-name>.onrender.com`.
-4. Run the seed scripts **once** from the Render shell:
+3. Deploy. The service comes up at `https://<service-name>.onrender.com`.
+4. Seed it **once** from the Render shell:
    ```bash
-   npm run seed && npm run create-index
+   npm run seed          # data + embeddings
+   npm run create-index  # Atlas vector index (once per cluster)
    ```
-   `create-index` is only needed once per Atlas cluster (it builds the vector index).
+   The embeddings are what the recommender searches, so a data-only seed will
+   leave the RAG endpoint returning `503`.
 
 > Free instances sleep after 15 minutes idle, so the first request after a pause
 > takes ~30 seconds to wake. The RAG model is loaded lazily (`PRELOAD_MODEL=false`)
 > to stay inside the 512 MB memory limit.
 
-Finally, set that backend URL on Vercel:
+Finally, point the frontend at it:
 
 ```bash
 cd frontend
