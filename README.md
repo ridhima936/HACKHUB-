@@ -259,6 +259,20 @@ npm run test:api
 
 ## ☁️ Deployment
 
+### ⚡ One-click deploy
+
+<div>
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ridhima936/HACKHUB-)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fridhima936%2FHACKHUB-&root-directory=frontend&project-name=hackhub-frontend)
+
+</div>
+
+> You still need a free **MongoDB Atlas** cluster for `MONGO_URI` — Atlas Vector Search is
+> what powers the RAG feature. Then deploy the backend with the Render button, copy its
+> URL into the frontend's `VITE_API_URL`, and the frontend's URL back into `CLIENT_URL`.
+
 ### Backend → Render (or Railway / Fly.io / any Node host)
 
 1. Push the repo to GitHub.
