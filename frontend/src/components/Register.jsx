@@ -2,7 +2,7 @@ import { useState } from "react";
 import api, { errorMessage } from "../services/api";
 import { AuthShell, Crest } from "./Ui";
 
-function Register({ onLogin, onLoginSuccess }) {
+function Register({ onLogin, onLoginSuccess, onBack }) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -63,6 +63,10 @@ function Register({ onLogin, onLoginSuccess }) {
                 Already enrolled?{" "}
                 <button type="button" className="link-btn" onClick={onLogin}>Sign in</button>
             </p>
+
+            <button type="button" className="link-btn auth-back" onClick={onBack}>
+                ← Back to home
+            </button>
 
             <div className="auth-foot">
                 <span>📚 Projects</span>

@@ -42,15 +42,31 @@
 ## ✨ Features
 
 - **🔐 Authentication** — register / login with bcrypt-hashed passwords and JWT sessions.
+- **🏠 Landing page** — explains what HackHub does and previews three currently-open hackathons.
 - **📜 Projects** — create, browse, search, filter, sort, edit and delete projects
   (ownership-protected: only the creator can update or delete).
 - **🛡️ Teams** — create fellowships, join / leave, and view members with roles.
-- **🔮 Hackathon archives** — searchable, filterable list of hackathons with deadlines.
-- **🤖 AI Recommendation Chamber (RAG)** — describe your skills in plain text and get
-  the best-matching hackathons, ranked by semantic similarity with a match score.
+- **🔮 Hackathon discovery** — real, currently-open hackathons from Unstop with the
+  organizer, deadline, mode, technology tags and a **"Register on Unstop"** button that
+  opens the actual event page.
+- **🤖 Skill-based recommendations (RAG)** — type your stack and get the closest
+  hackathons ranked by semantic similarity, with a match score.
 - **🎨 Original design** — a bespoke "magical academy" theme (no templates), with a
   full-page welcome artwork on the sign-in / create-account screens.
 - **📱 Responsive** — desktop sidebar, mobile drawer, keyboard-accessible modals, toasts.
+
+## 🏆 Hackathon data
+
+The archive in `seed/hackathons.js` holds **real hackathons collected from
+[unstop.com](https://unstop.com/hackathons)**. Each record stores the organizer, deadline,
+mode, technology tags and the canonical Unstop URL, and the button on every card links
+straight to that page.
+
+The list is curated by hand rather than scraped — Unstop's listing pages are rendered
+client-side, so a scraper would be brittle and would break the moment their markup
+changes. To refresh the archive, update `seed/hackathons.js` and re-run `npm run seed`.
+Records carry `source` and `lastChecked` fields so it is always clear when they were
+verified. If fewer hackathons are open, fewer are shown — nothing is invented.
 
 ## 📸 Screenshots
 
@@ -164,10 +180,10 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 npm run install:all        # backend + frontend
 ```
 
-### 3. Seed the hackathon archives + embeddings
+### 3. Seed the hackathon archive + embeddings
 
 ```bash
-npm run seed               # data, then 384-dim embeddings
+npm run seed               # real Unstop hackathons, then 384-dim embeddings
 ```
 
 > The first run downloads the MiniLM model (~90 MB) into the transformers cache.
@@ -234,9 +250,9 @@ curl -X POST http://localhost:5000/api/hackathons/recommend \
   "message": "Hackathons recommended successfully",
   "method": "atlas-vector-search",
   "model": "Xenova/all-MiniLM-L6-v2",
-  "total": 12,
+  "total": 6,
   "recommendations": [
-    { "_id": "…", "name": "Generative AI & RAG Hackathon", "score": 0.84, "…": "…" }
+    { "_id": "…", "name": "Codex 48 - National-Level Hackathon", "score": 0.72, "…": "…" }
   ]
 }
 ```
@@ -256,6 +272,30 @@ npm test                                   # fast, offline
 npm start                                  # then, in another terminal:
 npm run test:api
 ```
+
+## 🧪 Testing the API with Apidog
+
+The endpoints above are quick to explore in [Apidog](https://apidog.com/) without writing any code.
+
+1. Create a new project and set the environment base URL to `http://localhost:5000/api`.
+2. Add a **Login** request: `POST /auth/login` with `{ "email": "you@college.edu", "password": "..." }`.
+   Copy the `token` from the response.
+3. In **Environments**, add a variable `token`, then set the Auth header on protected
+   requests to `Bearer {{token}}`.
+4. Save the folder and run the requests in order to walk through register → login →
+   projects → teams → recommendations.
+
+A useful smoke run:
+
+| # | Request | Notes |
+|---|---|---|
+| 1 | `GET /health` | Confirms the API and DB are up |
+| 2 | `POST /auth/register` | Use a throwaway email |
+| 3 | `POST /auth/login` | Save the returned `token` |
+| 4 | `GET /auth/me` | Needs the Bearer token |
+| 5 | `GET /hackathons` | Public; real Unstop events |
+| 6 | `POST /hackathons/recommend` | Body: `{ "techStack": ["React", "Node.js", "MongoDB"] }` |
+
 
 ## ☁️ Deployment
 

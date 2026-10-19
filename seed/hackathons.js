@@ -1,260 +1,110 @@
+// Seeds the hackathon archive with real, currently-open hackathons from Unstop.
+//
+// These entries were collected from unstop.com in October 2026. Each `officialUrl`
+// points at the actual competition page, so "Register on Unstop" opens the real event.
+// Re-run `npm run seed` after updating the list; then run `npm run seed:embeddings`
+// to rebuild the embeddings used by the recommender.
+//
+// Every record has a `source` + `lastChecked` field so it is clear the data was
+// curated by hand rather than scraped live.
+require("dotenv").config({ quiet: true });
 const mongoose = require("mongoose");
 const Hackathon = require("../models/Hackathon");
-require("dotenv").config({ quiet: true });
 
-// Deadlines are sample values - replace with real events from the official links.
+const LAST_CHECKED = new Date("2026-10-19");
+
+const UNSTOP = "Unstop";
+
 const hackathons = [
     {
-        "name": "AI Innovation Hackathon",
-        "description": "Build an innovative AI-powered solution for a real-world problem using machine learning and modern web tools.",
-        "techStack": [
-            "React",
-            "Node.js",
-            "MongoDB",
-            "AI",
-            "Python"
-        ],
-        "skills": [
-            "JavaScript",
-            "Machine Learning",
-            "Artificial Intelligence",
-            "Backend"
-        ],
-        "platform": "Unstop",
-        "officialUrl": "https://unstop.com/hackathons",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2026-12-31"
+        name: "CodeVerse India - National Level Hackathon",
+        organizer: "WeCodeCoders",
+        platform: UNSTOP,
+        mode: "Online",
+        location: "Online",
+        description:
+            "A three-round national hackathon with full-stack product engineering, agentic AI and open-innovation tracks. Open to students and professionals across India.",
+        techStack: ["React", "Node.js", "JavaScript", "MongoDB", "Express", "Full Stack"],
+        skills: ["Full Stack", "Web Development", "Backend", "REST APIs", "Software Development"],
+        deadline: new Date("2026-10-29"),
+        officialUrl: "https://unstop.com/hackathons/codeverse-india-national-level-hackathon-wecodecoders-1763003",
+        source: UNSTOP,
+        lastChecked: LAST_CHECKED
     },
     {
-        "name": "Web Development Hackathon",
-        "description": "Create a modern, responsive web application using current frontend and backend technologies.",
-        "techStack": [
-            "React",
-            "Node.js",
-            "JavaScript",
-            "MongoDB",
-            "Express"
-        ],
-        "skills": [
-            "Frontend",
-            "Backend",
-            "Web Development",
-            "REST APIs"
-        ],
-        "platform": "Unstop",
-        "officialUrl": "https://unstop.com/hackathons",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2026-12-20"
+        name: "Codex 48 - National-Level Hackathon",
+        organizer: "WeCodeCoders",
+        platform: UNSTOP,
+        mode: "Online",
+        location: "Online",
+        description:
+            "A 48-hour national-level hackathon running over three rounds. Tracks cover agentic AI, full-stack product engineering and open innovation, with PPO opportunities for top teams.",
+        techStack: ["React", "Node.js", "JavaScript", "MongoDB", "Express", "Full Stack"],
+        skills: ["Full Stack", "Web Development", "Backend", "Software Development", "Open Innovation"],
+        deadline: new Date("2026-10-24"),
+        officialUrl: "https://unstop.com/hackathons/codex-48-national-level-hackathon-wecodecoders-1761082",
+        source: UNSTOP,
+        lastChecked: LAST_CHECKED
     },
     {
-        "name": "Open Innovation Hackathon",
-        "description": "Develop a technology-based solution for an open-ended problem of your choice.",
-        "techStack": [
-            "React",
-            "Node.js",
-            "Python",
-            "AI"
-        ],
-        "skills": [
-            "Problem Solving",
-            "Software Development",
-            "Product Thinking"
-        ],
-        "platform": "Devpost",
-        "officialUrl": "https://devpost.com/hackathons",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2027-01-15"
+        name: "WCC Forge 48",
+        organizer: "WeCodeCoders",
+        platform: UNSTOP,
+        mode: "Online",
+        location: "Online",
+        description:
+            "A 12-day online hackathon where teams build and submit a working product under Agentic AI, Open Innovation or Education. Free entry with a Rs 25,000 prize pool and PPO opportunities.",
+        techStack: ["React", "Node.js", "JavaScript", "MongoDB", "Express", "Web Development"],
+        skills: ["Web Development", "Full Stack", "Open Innovation", "Software Development", "UI/UX"],
+        deadline: new Date("2026-10-29"),
+        officialUrl: "https://unstop.com/hackathons/wcc-forge-48-wecodecoders-1756040",
+        source: UNSTOP,
+        lastChecked: LAST_CHECKED
     },
     {
-        "name": "Smart Campus Challenge",
-        "description": "Solve everyday campus problems with connected, data-driven software: timetables, attendance, safety and sustainability.",
-        "techStack": [
-            "React",
-            "Node.js",
-            "MongoDB",
-            "IoT"
-        ],
-        "skills": [
-            "Full Stack",
-            "Data Analysis",
-            "UI Design"
-        ],
-        "platform": "Unstop",
-        "officialUrl": "https://unstop.com/hackathons",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2027-01-30"
+        name: "CodeTitans India 2026 - National Hackathon",
+        organizer: "WeCodeCoders",
+        platform: UNSTOP,
+        mode: "Online",
+        location: "Online",
+        description:
+            "Three rounds: a solution PDF, then a functional product build, then final polish. Teams are judged on a working central workflow. Rs 30,000 prize pool plus internship and incubation offers.",
+        techStack: ["React", "Node.js", "JavaScript", "MongoDB", "Express", "Full Stack"],
+        skills: ["Full Stack", "Web Development", "Backend", "Software Development", "Product Thinking"],
+        deadline: new Date("2026-11-06"),
+        officialUrl: "https://unstop.com/hackathons/codetitans-india-2026-national-hackathon-wecodecoders-1766190",
+        source: UNSTOP,
+        lastChecked: LAST_CHECKED
     },
     {
-        "name": "FinTech Builders Sprint",
-        "description": "Design secure payment, budgeting or ledger tools for the next generation of digital finance.",
-        "techStack": [
-            "Node.js",
-            "Express",
-            "MongoDB",
-            "TypeScript",
-            "Docker"
-        ],
-        "skills": [
-            "Backend",
-            "Security",
-            "API Design",
-            "Databases"
-        ],
-        "platform": "Devpost",
-        "officialUrl": "https://devpost.com/hackathons",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2027-02-10"
+        name: "RunUp Coders Hackathon 2026",
+        organizer: "CodeVerse Community",
+        platform: UNSTOP,
+        mode: "Online",
+        location: "Online",
+        description:
+            "A fully online open-innovation hackathon for students across India. Idea submission round followed by a build round covering web development, AI, data science, FinTech and social impact.",
+        techStack: ["React", "Node.js", "JavaScript", "MongoDB", "Express", "Web Development"],
+        skills: ["Web Development", "Open Innovation", "Full Stack", "Problem Solving", "Software Development"],
+        deadline: new Date("2026-10-30"),
+        officialUrl: "https://unstop.com/hackathons/codeverse-2026-open-innovation-hackathon-codeverse-community-1764453",
+        source: UNSTOP,
+        lastChecked: LAST_CHECKED
     },
     {
-        "name": "Machine Learning & Data Science Cup",
-        "description": "Train, evaluate and ship a model on a real dataset. Notebooks, dashboards and clear storytelling are rewarded.",
-        "techStack": [
-            "Python",
-            "TensorFlow",
-            "Pandas",
-            "Scikit-learn",
-            "AI"
-        ],
-        "skills": [
-            "Machine Learning",
-            "Data Science",
-            "Statistics"
-        ],
-        "platform": "Kaggle",
-        "officialUrl": "https://www.kaggle.com/competitions",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2027-02-28"
-    },
-    {
-        "name": "Cloud & DevOps Challenge",
-        "description": "Containerise, deploy and monitor a production-style application with CI/CD and infrastructure as code.",
-        "techStack": [
-            "Docker",
-            "Kubernetes",
-            "AWS",
-            "Linux",
-            "GitHub Actions"
-        ],
-        "skills": [
-            "DevOps",
-            "Cloud Computing",
-            "Automation",
-            "Linux"
-        ],
-        "platform": "Devpost",
-        "officialUrl": "https://devpost.com/hackathons",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2027-03-12"
-    },
-    {
-        "name": "Mobile App Innovation Hackathon",
-        "description": "Ship a polished cross-platform mobile app that solves a clear user problem.",
-        "techStack": [
-            "React Native",
-            "Flutter",
-            "Firebase",
-            "JavaScript"
-        ],
-        "skills": [
-            "Mobile Development",
-            "UI/UX",
-            "Frontend"
-        ],
-        "platform": "Unstop",
-        "officialUrl": "https://unstop.com/hackathons",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2027-03-25"
-    },
-    {
-        "name": "Cybersecurity Capture The Flag",
-        "description": "Hunt vulnerabilities, solve cryptography puzzles and defend systems in a timed team CTF.",
-        "techStack": [
-            "Linux",
-            "Python",
-            "C++",
-            "Networking"
-        ],
-        "skills": [
-            "Security",
-            "Cryptography",
-            "Operating Systems"
-        ],
-        "platform": "CTFtime",
-        "officialUrl": "https://ctftime.org/event/list/upcoming",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2027-04-05"
-    },
-    {
-        "name": "Generative AI & RAG Hackathon",
-        "description": "Build retrieval-augmented applications with embeddings, vector search and LLM APIs.",
-        "techStack": [
-            "Python",
-            "Node.js",
-            "MongoDB Atlas",
-            "Vector Search",
-            "AI",
-            "React"
-        ],
-        "skills": [
-            "RAG",
-            "Embeddings",
-            "LLMs",
-            "Backend"
-        ],
-        "platform": "Devpost",
-        "officialUrl": "https://devpost.com/hackathons",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2027-04-20"
-    },
-    {
-        "name": "Open Source Contribution Quest",
-        "description": "Contribute meaningful pull requests to open-source projects and document your journey.",
-        "techStack": [
-            "Git",
-            "GitHub",
-            "JavaScript",
-            "Python"
-        ],
-        "skills": [
-            "Open Source",
-            "Collaboration",
-            "Documentation"
-        ],
-        "platform": "GitHub",
-        "officialUrl": "https://github.com/explore",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2027-05-10"
-    },
-    {
-        "name": "Game Development Jam",
-        "description": "Create a small but delightful game in 72 hours around a surprise theme.",
-        "techStack": [
-            "C++",
-            "JavaScript",
-            "Unity",
-            "Canvas"
-        ],
-        "skills": [
-            "Game Development",
-            "Algorithms",
-            "Creativity"
-        ],
-        "platform": "itch.io",
-        "officialUrl": "https://itch.io/jams",
-        "githubUrl": null,
-        "vercelUrl": null,
-        "deadline": "2027-05-30"
+        name: "Vihaan X: Software Track",
+        organizer: "IEEE DTU (Delhi Technological University)",
+        platform: UNSTOP,
+        mode: "Hybrid",
+        location: "Delhi Technological University, New Delhi",
+        description:
+            "North India's largest student-run hackathon, organised by IEEE DTU. The software track focuses on building real, scalable products with mentoring from industry experts across HealthTech, FinTech, Education and Web3.",
+        techStack: ["React", "Node.js", "JavaScript", "MongoDB", "Express", "Full Stack"],
+        skills: ["Full Stack", "Web Development", "Backend", "UI/UX", "Software Development"],
+        deadline: new Date("2026-11-07"),
+        officialUrl: "https://unstop.com/hackathons/vihaan-x-software-track-dtu-new-delhi-1761841",
+        source: UNSTOP,
+        lastChecked: LAST_CHECKED
     }
 ];
 
@@ -267,10 +117,9 @@ const seedHackathons = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI);
         const removed = await Hackathon.deleteMany();
-        await Hackathon.insertMany(
-            hackathons.map((h) => ({ ...h, deadline: new Date(h.deadline) }))
-        );
-        console.log(`Seeded ${hackathons.length} hackathons (removed ${removed.deletedCount} old records).`);
+        await Hackathon.insertMany(hackathons);
+
+        console.log(`Seeded ${hackathons.length} real Unstop hackathons (removed ${removed.deletedCount} old records).`);
         console.log("Embeddings were cleared - run `npm run seed:embeddings` to rebuild them.");
     } catch (error) {
         console.error("Seeding error:", error.message);

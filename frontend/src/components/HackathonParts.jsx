@@ -27,6 +27,7 @@ export function HackathonCard({ h, score }) {
             )}
 
             <h3>{h.name}</h3>
+            {h.organizer && <p className="byline">by {h.organizer}</p>}
             <p className="clamp">{h.description}</p>
 
             {h.techStack?.length > 0 && (
@@ -40,12 +41,24 @@ export function HackathonCard({ h, score }) {
                 <span>Deadline</span>
                 <b>{formatDate(h.deadline)}</b>
             </div>
+            {(h.mode || h.location) && (
+                <div className="card-meta">
+                    <span>Mode</span>
+                    <b>
+                        {h.mode && h.location && h.location !== h.mode
+                            ? `${h.mode} · ${h.location}`
+                            : h.mode || h.location}
+                    </b>
+                </div>
+            )}
 
-            <div className="card-actions">
-                {h.officialUrl && <a className="btn btn-gold" href={h.officialUrl} target="_blank" rel="noreferrer">Official page</a>}
-                {h.githubUrl && <a className="btn btn-ghost" href={h.githubUrl} target="_blank" rel="noreferrer">GitHub</a>}
-                {h.vercelUrl && <a className="btn btn-ghost" href={h.vercelUrl} target="_blank" rel="noreferrer">Live demo</a>}
-            </div>
+            {h.officialUrl && (
+                <div className="card-actions">
+                    <a className="btn btn-gold btn-block" href={h.officialUrl} target="_blank" rel="noreferrer">
+                        Register on Unstop
+                    </a>
+                </div>
+            )}
         </article>
     );
 }

@@ -28,9 +28,27 @@ const hackathonSchema = new mongoose.Schema(
             type: Date
         },
 
+        organizer: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+
         platform: {
             type: String,
             default: "Unstop"
+        },
+
+        // "Online" | "Offline" | "Hybrid" - shown as a badge on each card.
+        mode: {
+            type: String,
+            default: "Online"
+        },
+
+        location: {
+            type: String,
+            trim: true,
+            default: ""
         },
 
         officialUrl: {
@@ -38,14 +56,14 @@ const hackathonSchema = new mongoose.Schema(
             required: true
         },
 
-        githubUrl: {
+        // Where the record came from and when it was last verified by hand.
+        source: {
             type: String,
-            default: null
+            default: "Unstop"
         },
 
-        vercelUrl: {
-            type: String,
-            default: null
+        lastChecked: {
+            type: Date
         },
 
         embedding: {

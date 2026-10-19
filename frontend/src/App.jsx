@@ -7,6 +7,7 @@ import Projects from "./components/Projects";
 import CreateProject from "./components/CreateProject";
 import Team from "./components/Team";
 import Hackathons from "./components/Hackathons";
+import Landing from "./components/Landing";
 import { Crest, EmptyState, Loading } from "./components/Ui";
 import { useToast } from "./components/Toast";
 
@@ -23,7 +24,7 @@ function App() {
     const { notify } = useToast();
     const [token, setToken] = useState(() => localStorage.getItem("token"));
     const [user, setUser] = useState(null);
-    const [authMode, setAuthMode] = useState("login");
+    const [authMode, setAuthMode] = useState("landing");
     const [view, setView] = useState("dashboard");
     const [menuOpen, setMenuOpen] = useState(false);
     const [loadError, setLoadError] = useState("");
@@ -35,7 +36,7 @@ function App() {
         setUser(null);
         setLoadError("");
         setView("dashboard");
-        setAuthMode("login");
+        setAuthMode("landing");
         setMenuOpen(false);
     }, []);
 
@@ -79,6 +80,12 @@ function App() {
         setReloadKey((k) => k + 1);
     };
 
+    // The landing page is the default view for signed-out visitors.
+    const showLanding = () => {
+        setAuthMode("landing");
+        setMenuOpen(false);
+    };
+
     const go = (id) => {
         setView(id);
         setMenuOpen(false);
@@ -86,11 +93,13 @@ function App() {
     };
 
     if (!token) {
-        return authMode === "login" ? (
-            <Login onRegister={() => setAuthMode("register")} onLoginSuccess={handleLoginSuccess} />
-        ) : (
-            <Register onLogin={() => setAuthMode("login")} onLoginSuccess={handleLoginSuccess} />
-        );
+        if (authMode === "login") {
+            return <Login onRegister={() => setAuthMode("register")} onLoginSuccess={handleLoginSuccess} onBack={showLanding} />;
+        }
+        if (authMode === "register") {
+            return <Register onLogin={() => setAuthMode("login")} onLoginSuccess={handleLoginSuccess} onBack={showLanding} />;
+        }
+        return <Landing onLogin={() => setAuthMode("login")} onRegister={() => setAuthMode("register")} />;
     }
 
     const renderView = () => {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import api, { errorMessage } from "../services/api";
 import { AuthShell, Crest } from "./Ui";
 
-function Login({ onRegister, onLoginSuccess }) {
+function Login({ onRegister, onLoginSuccess, onBack }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -49,6 +49,10 @@ function Login({ onRegister, onLoginSuccess }) {
                 New to the academy?{" "}
                 <button type="button" className="link-btn" onClick={onRegister}>Create an account</button>
             </p>
+
+            <button type="button" className="link-btn auth-back" onClick={onBack}>
+                ← Back to home
+            </button>
 
             <div className="auth-foot">
                 <span>📚 Projects</span>

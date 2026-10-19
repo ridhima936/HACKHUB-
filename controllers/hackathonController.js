@@ -12,10 +12,11 @@ const PROJECTION = {
     techStack: 1,
     skills: 1,
     deadline: 1,
+    organizer: 1,
     platform: 1,
-    officialUrl: 1,
-    githubUrl: 1,
-    vercelUrl: 1
+    mode: 1,
+    location: 1,
+    officialUrl: 1
 };
 
 /** Primary path: MongoDB Atlas Vector Search. */

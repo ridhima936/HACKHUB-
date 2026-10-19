@@ -15,4 +15,6 @@ coverage
 logs
 *.log
 .cache
-models
+# NOTE: do NOT ignore `models/` - that is the Mongoose schema folder.
+# The transformers model cache lives under node_modules/ and is already excluded.
+**/node_modules/.cache
