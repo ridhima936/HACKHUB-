@@ -25,7 +25,22 @@ const origins = (process.env.CLIENT_URL || "http://localhost:5173")
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean);
-app.use(cors({ origin: origins }));
+// Vite picks the next free port (5174, 5175, ...) when 5173 is already taken, so
+// also accept any localhost origin during development. Deployed origins must still
+// be listed explicitly in CLIENT_URL.
+const isLocalhost = (origin) => /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+
+app.use(
+    cors({
+        origin(origin, callback) {
+            // No Origin header => same-origin requests, curl, health checks, etc.
+            if (!origin || origins.includes(origin) || isLocalhost(origin)) {
+                return callback(null, true);
+            }
+            return callback(null, false);
+        },
+    })
+);
 
 // Minimal, dependency-free security headers for the API.
 app.use((req, res, next) => {
