@@ -6,21 +6,23 @@
 services:
   - type: web
     name: hackhub-api
-    runtime: node
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     plan: free
     region: singapore
-    buildCommand: npm ci
-    startCommand: npm start
     healthCheckPath: /api/health
     envVars:
-      - key: NODE_VERSION
-        value: "22"
       - key: MONGO_URI
         sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
         sync: false
+      - key: PORT
+        value: "5000"
       # Skip the boot-time model download; the RAG endpoint loads it lazily.
       - key: PRELOAD_MODEL
         value: "false"
+      # Render's free tier has 512 MB RAM - the MiniLM model needs headroom.
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=400"
