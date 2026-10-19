@@ -1,0 +1,31 @@
+{
+  "name": "hackhub",
+  "version": "1.0.0",
+  "description": "HackHub - a student developer platform for projects, teams and AI-recommended hackathons",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node seed/hackathons.js && node seed/generateEmbeddings.js",
+    "seed:data": "node seed/hackathons.js",
+    "seed:embeddings": "node seed/generateEmbeddings.js",
+    "create-index": "node seed/createVectorIndex.js",
+    "install:all": "npm install && npm install --prefix frontend",
+    "client": "npm run dev --prefix frontend",
+    "test": "node tests/smoke.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@xenova/transformers": "^2.17.2",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.11.2"
+  }
+}
