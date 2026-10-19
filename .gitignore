@@ -29,7 +29,9 @@ pnpm-debug.log*
 # ---- ML model cache (@xenova/transformers) ----
 .cache/
 **/.cache/
-models/
+# NOTE: do NOT ignore `models/` - that is the Mongoose schema folder.
+# The transformers model cache lives under node_modules/.cache, already ignored above.
+**/node_modules/.cache
 
 # ---- Editors / OS ----
 .vscode/*
