@@ -24,7 +24,11 @@
 | 💻 **Repository** | [github.com/ridhima936/HACKHUB-](https://github.com/ridhima936/HACKHUB-) |
 | 🐛 **Report a bug** | [github.com/ridhima936/HACKHUB-/issues](https://github.com/ridhima936/HACKHUB-/issues) |
 | 🖥️ **API base URL** | `http://localhost:5000/api` (local) — see [Deployment](#-deployment) to host it |
-| 🔗 **Live demo** | _Not deployed yet_ — run it locally in one command (see below) |
+| 🔗 **Live demo** | [frontend-three-orpin-83.vercel.app](https://frontend-three-orpin-83.vercel.app) (frontend on Vercel) |
+
+> The frontend is deployed. `VITE_API_URL` points at the backend host, so the API
+> needs to be deployed too before the live site can load data — see
+> [Deployment](#-deployment).
 
 > **Run it locally in 60 seconds**
 >
@@ -313,21 +317,47 @@ A useful smoke run:
 > what powers the RAG feature. Then deploy the backend with the Render button, copy its
 > URL into the frontend's `VITE_API_URL`, and the frontend's URL back into `CLIENT_URL`.
 
-### Backend → Render (or Railway / Fly.io / any Node host)
+### Backend → Render (Docker blueprint)
 
-1. Push the repo to GitHub.
-2. On Render: **New → Blueprint**, pick the repo (it reads `render.yaml`), then set
-   `MONGO_URI` and `CLIENT_URL` (`https://<your-frontend>.vercel.app`).
-3. Run the seed scripts once from the Render shell:
+The repo includes `render.yaml`, which tells Render to build the **Dockerfile** on the
+free plan.
+
+1. Go to [render.com](https://render.com) → **New → Blueprint** and pick
+   `ridhima936/HACKHUB-`.
+2. Render reads `render.yaml` and prompts for the two secret values:
+   - `MONGO_URI` — your Atlas connection string
+   - `CLIENT_URL` — `https://frontend-three-orpin-83.vercel.app`
+     (add other origins comma-separated if needed)
+3. Deploy. The service comes up at
+   `https://<service-name>.onrender.com`.
+4. Run the seed scripts **once** from the Render shell:
    ```bash
    npm run seed && npm run create-index
    ```
+   `create-index` is only needed once per Atlas cluster (it builds the vector index).
 
-### Frontend → Vercel (or Netlify)
+> Free instances sleep after 15 minutes idle, so the first request after a pause
+> takes ~30 seconds to wake. The RAG model is loaded lazily (`PRELOAD_MODEL=false`)
+> to stay inside the 512 MB memory limit.
+
+Finally, set that backend URL on Vercel:
+
+```bash
+cd frontend
+vercel env add VITE_API_URL production   # https://<service-name>.onrender.com/api
+vercel deploy --prod
+```
+
+### Frontend → Vercel
 
 1. Import the repo and set the **root directory** to `frontend`.
 2. Add the environment variable `VITE_API_URL=https://<your-api>.onrender.com/api`.
 3. Deploy. `frontend/vercel.json` already configures the Vite build and SPA rewrites.
+
+> Vite inlines `VITE_API_URL` at build time, so changing it requires a redeploy.
+> Set it in the Vercel project settings — never put secrets in a `VITE_*` variable.
+
+Current production frontend: **https://frontend-three-orpin-83.vercel.app**
 
 Deploying the frontend first? That's fine — just add its URL to the backend's
 `CLIENT_URL` afterwards so CORS allows it.
