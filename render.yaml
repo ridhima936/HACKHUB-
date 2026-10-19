@@ -1,0 +1,26 @@
+# Render blueprint for the HackHub API.
+# 1. Push this repository to GitHub.
+# 2. In Render: New -> Blueprint -> select the repo. It reads this file.
+# 3. Fill in MONGO_URI and CLIENT_URL when prompted.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: hackhub-api
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        sync: false
+      # Skip the boot-time model download; the RAG endpoint loads it lazily.
+      - key: PRELOAD_MODEL
+        value: "false"

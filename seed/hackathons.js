@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Hackathon = require("../models/Hackathon");
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
 // Deadlines are sample values - replace with real events from the official links.
 const hackathons = [
@@ -259,15 +259,24 @@ const hackathons = [
 ];
 
 const seedHackathons = async () => {
+    if (!process.env.MONGO_URI) {
+        console.error("MONGO_URI is not set. Add it to your .env file (see .env.example).");
+        process.exit(1);
+    }
+
     try {
         await mongoose.connect(process.env.MONGO_URI);
-        await Hackathon.deleteMany();
-        await Hackathon.insertMany(hackathons.map((h) => ({ ...h, deadline: new Date(h.deadline) })));
-        console.log(`Seeded ${hackathons.length} hackathons`);
-        await mongoose.connection.close();
+        const removed = await Hackathon.deleteMany();
+        await Hackathon.insertMany(
+            hackathons.map((h) => ({ ...h, deadline: new Date(h.deadline) }))
+        );
+        console.log(`Seeded ${hackathons.length} hackathons (removed ${removed.deletedCount} old records).`);
+        console.log("Embeddings were cleared - run `npm run seed:embeddings` to rebuild them.");
     } catch (error) {
-        console.log("Seeding error:", error.message);
-        process.exit(1);
+        console.error("Seeding error:", error.message);
+        process.exitCode = 1;
+    } finally {
+        await mongoose.connection.close().catch(() => {});
     }
 };
 

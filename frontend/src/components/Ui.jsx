@@ -16,6 +16,22 @@ export function Crest({ size = 44 }) {
     );
 }
 
+/**
+ * Shared frame for the sign-in / create-account screens. The welcome artwork is
+ * applied as a full-page background in index.css (.auth-page).
+ */
+export function AuthShell({ children }) {
+    return (
+        <div className="auth-page">
+            <div className="auth-brand" aria-hidden="true">
+                <Crest size={32} />
+                <span>HackHub · The Developer Academy</span>
+            </div>
+            <div className="auth-card">{children}</div>
+        </div>
+    );
+}
+
 export function Modal({ title, onClose, children, wide = false }) {
     useEffect(() => {
         const onKey = (e) => e.key === "Escape" && onClose();

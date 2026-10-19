@@ -1,6 +1,7 @@
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
 const connectDB = require("./config/db");
 const { preloadModel } = require("./services/embeddingService");
 
@@ -16,14 +17,37 @@ if (!process.env.JWT_SECRET) {
 
 const app = express();
 
+// Do not advertise the framework.
+app.disable("x-powered-by");
+
+// Allow a comma-separated list of frontends (local dev + deployed URL).
 const origins = (process.env.CLIENT_URL || "http://localhost:5173")
     .split(",")
-    .map((o) => o.trim());
+    .map((o) => o.trim())
+    .filter(Boolean);
 app.use(cors({ origin: origins }));
+
+// Minimal, dependency-free security headers for the API.
+app.use((req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "no-referrer");
+    next();
+});
+
 app.use(express.json({ limit: "100kb" }));
 
+const DB_STATES = ["disconnected", "connected", "connecting", "disconnecting"];
+
 app.get("/", (req, res) => res.json({ message: "HackHub API is running" }));
-app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+app.get("/api/health", (req, res) =>
+    res.json({
+        status: "ok",
+        db: DB_STATES[mongoose.connection.readyState] || "unknown",
+        uptime: Math.round(process.uptime()),
+        timestamp: new Date().toISOString()
+    })
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
@@ -44,8 +68,20 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
         console.log(`HackHub server running on port ${PORT}`);
         if (process.env.PRELOAD_MODEL !== "false") preloadModel();
     });
+
+    // Close cleanly so Docker/Render restarts do not drop in-flight requests.
+    const shutdown = (signal) => {
+        console.log(`\n${signal} received - shutting down gracefully…`);
+        server.close(async () => {
+            await mongoose.connection.close().catch(() => {});
+            process.exit(0);
+        });
+        setTimeout(() => process.exit(1), 10000).unref();
+    };
+
+    ["SIGINT", "SIGTERM"].forEach((signal) => process.on(signal, () => shutdown(signal)));
 });

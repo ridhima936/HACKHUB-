@@ -7,7 +7,7 @@ import Projects from "./components/Projects";
 import CreateProject from "./components/CreateProject";
 import Team from "./components/Team";
 import Hackathons from "./components/Hackathons";
-import { Crest, Loading } from "./components/Ui";
+import { Crest, EmptyState, Loading } from "./components/Ui";
 import { useToast } from "./components/Toast";
 
 const NAV = [
@@ -26,11 +26,14 @@ function App() {
     const [authMode, setAuthMode] = useState("login");
     const [view, setView] = useState("dashboard");
     const [menuOpen, setMenuOpen] = useState(false);
+    const [loadError, setLoadError] = useState("");
+    const [reloadKey, setReloadKey] = useState(0);
 
     const logout = useCallback(() => {
         localStorage.removeItem("token");
         setToken(null);
         setUser(null);
+        setLoadError("");
         setView("dashboard");
         setAuthMode("login");
         setMenuOpen(false);
@@ -41,12 +44,19 @@ function App() {
         if (!token) return;
         let cancelled = false;
         api.get("/auth/me")
-            .then((res) => !cancelled && setUser({ ...res.data.user, id: res.data.user._id }))
-            .catch(() => {});
+            .then((res) => {
+                if (!cancelled) setUser({ ...res.data.user, id: res.data.user._id });
+            })
+            .catch((err) => {
+                // A 401 is handled by the api interceptor (forced logout).
+                if (!cancelled && err?.response?.status !== 401) {
+                    setLoadError("We could not reach the academy servers.");
+                }
+            });
         return () => {
             cancelled = true;
         };
-    }, [token]);
+    }, [token, reloadKey]);
 
     // Auto-logout when the API says the token is no longer valid.
     useEffect(() => {
@@ -59,8 +69,14 @@ function App() {
     }, [logout, notify]);
 
     const handleLoginSuccess = (newToken) => {
+        setLoadError("");
         localStorage.setItem("token", newToken);
         setToken(newToken);
+    };
+
+    const retryProfile = () => {
+        setLoadError("");
+        setReloadKey((k) => k + 1);
     };
 
     const go = (id) => {
@@ -78,7 +94,23 @@ function App() {
     }
 
     const renderView = () => {
-        if (!user) return <Loading text="Opening the academy gates…" />;
+        if (!user) {
+            if (loadError) {
+                return (
+                    <EmptyState
+                        icon="⚠"
+                        title="Could not load your profile"
+                        text={loadError}
+                        action={
+                            <button className="btn btn-gold" onClick={retryProfile}>
+                                Try again
+                            </button>
+                        }
+                    />
+                );
+            }
+            return <Loading text="Opening the academy gates…" />;
+        }
         switch (view) {
             case "projects":
                 return <Projects key="all" mode="all" user={user} onCreate={() => go("create")} />;

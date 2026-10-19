@@ -1,7 +1,45 @@
+# ---- Dependencies ----
 node_modules/
+frontend/node_modules/
+
+# ---- Environment / secrets ----
+# Never commit real credentials. Keep the templates.
 .env
-.env.*
+.env.local
+.env.*.local
 !.env.example
+frontend/.env
+frontend/.env.local
+!.env.example
+
+# ---- Build output ----
 dist/
 build/
+frontend/dist/
 coverage/
+
+# ---- Logs ----
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---- ML model cache (@xenova/transformers) ----
+.cache/
+**/.cache/
+models/
+
+# ---- Editors / OS ----
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.swp
+
+# ---- Misc ----
+*.local
+tmp/

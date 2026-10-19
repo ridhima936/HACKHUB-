@@ -6,15 +6,23 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const registerUser = async (req, res) => {
     try {
-        const { name, email, password } = req.body || {};
+        const rawName = req.body?.name;
+        const rawEmail = req.body?.email;
+        const { password } = req.body || {};
+
+        const name = typeof rawName === "string" ? rawName.trim() : "";
+        const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
 
         if (!name || !email || !password) {
             return res.status(400).json({ message: "Name, email and password are required" });
         }
+        if (name.length < 3) {
+            return res.status(400).json({ message: "Name must be at least 3 characters" });
+        }
         if (typeof password !== "string" || password.length < 6) {
             return res.status(400).json({ message: "Password must be at least 6 characters" });
         }
-        if (!EMAIL_RE.test(String(email))) {
+        if (!EMAIL_RE.test(email)) {
             return res.status(400).json({ message: "Please enter a valid email address" });
         }
 

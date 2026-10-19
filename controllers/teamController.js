@@ -3,7 +3,7 @@ const { isValidId } = require("../utils/helpers");
 
 const createTeam = async (req, res) => {
     try {
-        const { name, description } = req.body;
+        const { name, description } = req.body || {};
 
         const team = await Team.create({
             name,

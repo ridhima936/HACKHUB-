@@ -54,6 +54,7 @@ export function Recommender({ compact = false }) {
     const [skills, setSkills] = useState("");
     const [results, setResults] = useState(null);
     const [method, setMethod] = useState("");
+    const [model, setModel] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -76,6 +77,7 @@ export function Recommender({ compact = false }) {
             const { data } = await api.post("/hackathons/recommend", { techStack });
             setResults(data.recommendations || []);
             setMethod(data.method || "");
+            setModel(data.model || "");
         } catch (err) {
             setResults(null);
             setError(errorMessage(err, "The recommendation chamber is unavailable right now."));
@@ -119,7 +121,12 @@ export function Recommender({ compact = false }) {
                     <>
                         <div className="results-head">
                             <b>Top {results.length} matches</b>
-                            <small>{method === "atlas-vector-search" ? "MongoDB Atlas Vector Search · cosine" : "Semantic search · cosine similarity"}</small>
+                            <small>
+                                {method === "atlas-vector-search"
+                                    ? "MongoDB Atlas Vector Search · cosine"
+                                    : "Semantic search · cosine similarity"}
+                                {model ? ` · ${model}` : ""}
+                            </small>
                         </div>
                         <div className={compact ? "grid grid-compact" : "grid"}>
                             {results.map((h) => <HackathonCard key={h._id} h={h} score={h.score} />)}

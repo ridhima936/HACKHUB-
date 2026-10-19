@@ -1,4 +1,5 @@
-// End-to-end API smoke test. Usage: start the server, then `npm run test`
+// End-to-end API smoke test. Usage: start the server + seed the database, then
+// run `npm run test:api`.
 // Optional: API_URL=http://localhost:5000/api
 const BASE = process.env.API_URL || "http://localhost:5000/api";
 let passed = 0, failed = 0;
@@ -104,8 +105,16 @@ const check = (name, cond, extra = "") => {
     r = await call("POST", "/hackathons/recommend", { body: { techStack: ["React", "Node.js", "MongoDB"] } });
     check("recommend returns ranked results", r.status === 200 && r.data.recommendations?.length > 0, `(status ${r.status}: ${r.data?.message})`);
     if (r.status === 200) {
-        console.log(`        method=${r.data.method} top="${r.data.recommendations[0]?.name}" score=${r.data.recommendations[0]?.score?.toFixed(3)}`);
+        const recs = r.data.recommendations;
+        check("recommend reports search method", ["atlas-vector-search", "local-cosine"].includes(r.data.method));
+        check("recommend reports embedding model", typeof r.data.model === "string" && r.data.model.length > 0);
+        check("recommend reports embedded doc count", Number(r.data.total) > 0);
+        check("recommendations are sorted by score", recs.every((x, i) => i === 0 || recs[i - 1].score >= x.score));
+        check("recommendations never leak embeddings", recs.every((x) => !("embedding" in x)));
+        console.log(`        method=${r.data.method} model=${r.data.model} top="${recs[0]?.name}" score=${recs[0]?.score?.toFixed(3)}`);
     }
+    r = await call("POST", "/hackathons/recommend", { body: { techStack: Array.from({ length: 31 }, (_, i) => `s${i}`) } });
+    check("recommend rejects too many skills", r.status === 400);
 
     console.log("CLEANUP");
     r = await call("DELETE", `/projects/${pid}`, { token: ta });
