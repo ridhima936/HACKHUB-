@@ -1,0 +1,35 @@
+# Optional: run the API + a local MongoDB with one command.
+#
+#   cp .env.example .env       # set JWT_SECRET at least; MONGO_URI is overridden below
+#   docker compose up --build
+#
+# The API is then on http://localhost:5000.
+#
+# NOTE: Atlas Vector Search is only available on MongoDB Atlas, so this local
+# setup uses the automatic in-process cosine fallback (same embeddings, same
+# cosine ranking) - the RAG endpoint still works. Run `docker compose exec api
+# npm run seed` once to load hackathons and generate embeddings.
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      MONGO_URI: mongodb://mongo:27017/hackhub
+      PRELOAD_MODEL: "false"
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+
+volumes:
+  mongo-data:

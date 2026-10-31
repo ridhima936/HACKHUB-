@@ -1,0 +1,16 @@
+# Normalize line endings: always LF inside the repo, and LF on checkout
+# (prevents CRLF/LF churn between Windows, macOS and Linux contributors).
+* text=auto eol=lf
+
+# Binary assets — never touch these
+*.jpg  binary
+*.jpeg binary
+*.png  binary
+*.gif  binary
+*.ico  binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.otf  binary
+*.pdf  binary

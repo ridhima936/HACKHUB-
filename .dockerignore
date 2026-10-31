@@ -1,0 +1,20 @@
+node_modules
+frontend
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+.github
+*.md
+!README.md
+tests
+scripts
+docker-compose.yml
+coverage
+logs
+*.log
+.cache
+# NOTE: do NOT ignore `models/` - that is the Mongoose schema folder.
+# The transformers model cache lives under node_modules/ and is already excluded.
+**/node_modules/.cache
