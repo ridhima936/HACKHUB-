@@ -21,7 +21,7 @@
     "url": "https://github.com/ridhima936/HACKHUB-/issues"
   },
   "homepage": "https://github.com/ridhima936/HACKHUB-#readme",
-  "author": "HackHub",
+  "author": "Ridhima Chopra",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",

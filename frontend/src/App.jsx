@@ -40,7 +40,6 @@ function App() {
         setMenuOpen(false);
     }, []);
 
-    // Load the current user whenever we have a token.
     useEffect(() => {
         if (!token) return;
         let cancelled = false;
@@ -80,7 +79,6 @@ function App() {
         setReloadKey((k) => k + 1);
     };
 
-    // The landing page is the default view for signed-out visitors.
     const showLanding = () => {
         setAuthMode("landing");
         setMenuOpen(false);

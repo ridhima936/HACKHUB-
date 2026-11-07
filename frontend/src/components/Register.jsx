@@ -21,7 +21,6 @@ function Register({ onLogin, onLoginSuccess, onBack }) {
         setBusy(true);
         try {
             await api.post("/auth/register", { name, email, password });
-            // Sign the new student in straight away.
             const { data } = await api.post("/auth/login", { email, password });
             onLoginSuccess(data.token);
         } catch (err) {
