@@ -71,7 +71,7 @@ function Hackathons() {
                     action={<button className="btn btn-ghost" onClick={load}>Try again</button>} />
             ) : visible.length === 0 ? (
                 <EmptyState icon="🔮" title="No hackathons found"
-                    text={items.length === 0 ? "Run npm run seed on the backend to fill the archives." : "Try a different search or technology."} />
+                    text={items.length === 0 ? "No open hackathons right now. Check back soon." : "Try a different search or technology."} />
             ) : (
                 <div className="grid">{visible.map((h) => <HackathonCard key={h._id} h={h} />)}</div>
             )}

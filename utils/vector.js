@@ -1,8 +1,5 @@
-// Vector helpers used by the RAG recommendation pipeline.
-//
-// The embeddings produced by `services/embeddingService` are L2-normalized
-// (normalize: true), so the dot product of two vectors is already equal to
-// their cosine similarity - no extra division is required.
+// Embeddings from embeddingService are L2-normalized, so the dot product of two
+// vectors already equals their cosine similarity.
 
 /** Dot product of two equal-length (normalized) vectors. */
 const dotProduct = (a = [], b = []) => {

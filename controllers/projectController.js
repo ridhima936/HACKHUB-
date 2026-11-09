@@ -24,7 +24,7 @@ const getProjects = async (req, res) => {
             .populate("owner", "name")
             .sort({ createdAt: -1 });
         res.json(projects);
-    } catch (error) {
+    } catch {
         res.status(500).json({ message: "Failed to fetch projects" });
     }
 };
@@ -35,7 +35,7 @@ const getMyProjects = async (req, res) => {
             .populate("owner", "name")
             .sort({ createdAt: -1 });
         res.json(projects);
-    } catch (error) {
+    } catch {
         res.status(500).json({ message: "Failed to fetch your projects" });
     }
 };
@@ -48,7 +48,7 @@ const getProject = async (req, res) => {
         const project = await Project.findById(req.params.id).populate("owner", "name");
         if (!project) return res.status(404).json({ message: "Project not found" });
         res.json(project);
-    } catch (error) {
+    } catch {
         res.status(500).json({ message: "Failed to fetch project" });
     }
 };
@@ -114,7 +114,7 @@ const deleteProject = async (req, res) => {
 
         await project.deleteOne();
         res.json({ message: "Project deleted successfully" });
-    } catch (error) {
+    } catch {
         res.status(500).json({ message: "Failed to delete project" });
     }
 };

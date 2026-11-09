@@ -1,10 +1,5 @@
-// Creates the Atlas Vector Search index programmatically (Atlas clusters only).
-// Run: npm run create-index
-//
-// This script is idempotent:
-//   - no index yet            -> creates it
-//   - index exists and READY  -> does nothing
-//   - index exists but FAILED -> drops it and recreates it with a valid definition
+// Creates the Atlas Vector Search index (Atlas clusters only). Run: npm run create-index
+// Safe to re-run: it creates a missing index, skips a READY one, and rebuilds a FAILED one.
 require("dotenv").config({ quiet: true });
 const mongoose = require("mongoose");
 const Hackathon = require("../models/Hackathon");

@@ -1,6 +1,6 @@
 const Hackathon = require("../models/Hackathon");
 const { generateEmbedding, MODEL, EMBEDDING_DIMENSIONS } = require("../services/embeddingService");
-const { parseList } = require("../utils/helpers");
+const { parseList, openNow } = require("../utils/helpers");
 const { rankByCosine } = require("../utils/vector");
 
 const INDEX_NAME = "hackathon_vector_index";
@@ -27,10 +27,14 @@ const atlasSearch = (queryVector) =>
                 index: INDEX_NAME,
                 path: "embedding",
                 queryVector,
-                numCandidates: 50,
-                limit: LIMIT
+                numCandidates: 100,
+                limit: 50
             }
         },
+        // Expired hackathons are dropped after the vector search, so the Atlas
+        // index definition does not need a filter field.
+        { $match: openNow() },
+        { $limit: LIMIT },
         { $project: { ...PROJECTION, score: { $meta: "vectorSearchScore" } } }
     ]);
 
@@ -40,7 +44,7 @@ const atlasSearch = (queryVector) =>
  * building (Atlas needs ~1 minute after `npm run create-index`).
  */
 const localSearch = async (queryVector, limit = LIMIT) => {
-    const docs = await Hackathon.find({ "embedding.0": { $exists: true } }).lean();
+    const docs = await Hackathon.find({ "embedding.0": { $exists: true }, ...openNow() }).lean();
     return rankByCosine(queryVector, docs, limit);
 };
 
@@ -55,13 +59,23 @@ const recommendHackathons = async (req, res) => {
             return res.status(400).json({ message: "Please provide at most 30 skills" });
         }
 
-        // Fail fast (with a helpful message) when the archives have not been
-        // embedded yet, instead of returning a confusing empty result.
-        const embeddedCount = await Hackathon.countDocuments({ "embedding.0": { $exists: true } });
+        const embedded = { "embedding.0": { $exists: true } };
+        const embeddedCount = await Hackathon.countDocuments({ ...embedded, ...openNow() });
         if (embeddedCount === 0) {
-            return res.status(503).json({
-                message: "No hackathon embeddings found yet. Run `npm run seed` on the server to build the semantic index.",
-                method: "unavailable",
+            // Distinguish "never seeded" from "everything has expired".
+            const anyEmbedded = await Hackathon.countDocuments(embedded);
+            if (anyEmbedded === 0) {
+                return res.status(503).json({
+                    message: "No hackathon embeddings found yet. Run `npm run seed` on the server to build the semantic index.",
+                    method: "unavailable",
+                    recommendations: []
+                });
+            }
+            return res.json({
+                message: "No open hackathons right now",
+                method: "none",
+                model: MODEL,
+                total: 0,
                 recommendations: []
             });
         }

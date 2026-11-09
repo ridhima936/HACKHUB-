@@ -24,10 +24,19 @@ What is implemented in the code:
 - **Accounts:** register and log in. Passwords are hashed with bcrypt and sessions use JWTs that expire after one day.
 - **Projects:** create, view, edit and delete projects (name, description, category, tech stack, status). Only the owner can edit or delete a project. The library page has search, category and status filters, and sorting. There is also a "My Projects" page.
 - **Teams:** create a team, join it, leave it, and see its members. The team owner cannot leave.
-- **Hackathons:** a list of hackathons with organizer, deadline, mode, tech tags and a link to the official Unstop page. You can search it and filter by technology.
+- **Hackathons:** up to 6 open hackathons (soonest deadline first) with organizer, deadline, mode, tech tags and a link to the registration page. The list refreshes itself from Devpost (see "Where the hackathon data comes from"), and hackathons whose deadline has passed are hidden. You can search the list and filter by technology.
 - **Recommendations:** enter skills like `React, Node.js, MongoDB` and get the five closest hackathons with a match score.
 - **Landing page and dashboard:** a public landing page that previews hackathons, and a dashboard that shows counts for your projects, all projects, teams and hackathons.
 - **Responsive layout:** sidebar on desktop, slide-out menu on mobile.
+
+## Where the hackathon data comes from
+
+There are two sources, and every record stores which one it came from (`source`) and when it was last refreshed (`lastChecked`).
+
+- **Devpost, automatic.** The backend reads open, online hackathons from Devpost's public listing endpoint (`https://devpost.com/api/hackathons`), which is the same JSON the Devpost website uses. A sync runs when the server starts, every 6 hours while it is running, and in the background when someone loads the hackathon list and the data is more than a day old. That last trigger matters on free hosting, where the server sleeps and timers do not run. Each sync adds new hackathons, updates existing ones and removes ones Devpost no longer lists. New ones get embeddings (needed for recommendations) when the server is allowed to load the model, meaning `PRELOAD_MODEL` is not `false`. With `PRELOAD_MODEL=false`, as in `render.yaml`, the list still updates but embeddings are skipped; run `npm run sync` from your own computer, pointing at the same database, to add them. You can also run it by hand with `npm run sync`, and turn it off with `AUTO_SYNC=false`.
+- **Unstop, hand-curated.** Unstop has no public API that I could rely on, and I did not want to scrape it against its terms. The Unstop entries in `seed/hackathons.js` are added by hand from the official competition pages. `npm run seed` replaces only these entries and never touches the Devpost ones.
+
+The Devpost endpoint is not an officially documented API, so it could change or be restricted. If a sync fails, the server logs a warning, keeps the existing data and tries again after an hour. Devpost does not give a registration deadline as a field, only the submission period as text, so the deadline is parsed from that text (see `utils/devpost.js`). If the text cannot be read, the hackathon is shown without a deadline.
 
 ## How the recommendation works
 
@@ -150,6 +159,7 @@ Never commit a real `.env` file. It is already in `.gitignore`.
 | `PORT` | No | API port, default `5000` |
 | `CLIENT_URL` | No | Comma-separated list of allowed frontend origins for CORS, default `http://localhost:5173`. Any `localhost` origin is also allowed |
 | `PRELOAD_MODEL` | No | Set to `false` to skip loading the embedding model at startup |
+| `AUTO_SYNC` | No | Set to `false` to turn off the automatic Devpost sync |
 | `FORCE` | No | Set to `1` when running `npm run seed:embeddings` to regenerate existing embeddings |
 
 **Frontend (`frontend/.env`)**
@@ -178,7 +188,7 @@ All routes are under `/api`. "Auth" means an `Authorization: Bearer <token>` hea
 | POST | `/teams` | Yes | Create a team |
 | POST | `/teams/:id/join` | Yes | Join a team |
 | POST | `/teams/:id/leave` | Yes | Leave a team (not allowed for the owner) |
-| GET | `/hackathons` | No | List hackathons, optional `search` and `techStack` query params |
+| GET | `/hackathons` | No | Up to 6 open hackathons (deadline today or later), soonest deadline first, optional `search` and `techStack` query params. Also starts a background Devpost sync if the data is over a day old |
 | GET | `/hackathons/:id` | No | One hackathon |
 | POST | `/hackathons/recommend` | No | Body `{ "techStack": ["React", "Node.js"] }`, returns up to 5 ranked hackathons |
 
@@ -190,7 +200,7 @@ curl -X POST http://localhost:5000/api/hackathons/recommend \
   -d '{"techStack":["React","Node.js","MongoDB"]}'
 ```
 
-The response contains `method` (`atlas-vector-search` or `local-cosine`), `model`, `total` and a `recommendations` array where each item has a `score` between 0 and 1. If no embeddings exist yet it returns 503 with a message telling you to run the seed.
+The response contains `method` (`atlas-vector-search` or `local-cosine`), `model`, `total` (number of open hackathons) and a `recommendations` array where each item has a `score` between 0 and 1. If no embeddings exist yet it returns 503 with a message telling you to run the seed.
 
 ## Screenshots
 
@@ -211,7 +221,7 @@ Still to add:
 
 | Command | What it runs | Needs |
 |---|---|---|
-| `npm test` | 10 unit tests for the vector math | Nothing |
+| `npm test` | 22 unit tests: 10 for the vector math, 12 for the Devpost date parsing and mapping | Nothing |
 | `npm run test:api` | 39 API checks covering auth, projects, teams, hackathons and recommendations | Running server and seeded database |
 | `npm run check` | Syntax check of backend files | Nothing |
 | `npm run lint:client` | ESLint on the frontend | Frontend dependencies |
@@ -221,7 +231,7 @@ GitHub Actions runs the syntax check, unit tests, frontend lint and frontend bui
 
 ## Deployment
 
-- **Backend:** Render, using the `Dockerfile` through `render.yaml` (free plan, health check at `/api/health`). `MONGO_URI` and `CLIENT_URL` are entered in the Render dashboard, and `JWT_SECRET` is generated by Render. After the first deploy, run `npm run seed` and `npm run create-index` once from the Render shell.
+- **Backend:** Render, using the `Dockerfile` through `render.yaml` (free plan, health check at `/api/health`). `MONGO_URI` and `CLIENT_URL` are entered in the Render dashboard, and `JWT_SECRET` is generated by Render. After the first deploy, run `npm run seed` and `npm run create-index` once from your own computer, with `MONGO_URI` in your local `.env` pointing at the same Atlas database.
 - **Frontend:** Vercel with `frontend` as the root directory and `VITE_API_URL` set to the Render API URL ending in `/api`. `frontend/vercel.json` handles the build and the single-page-app rewrite.
 - **Database:** MongoDB Atlas.
 
@@ -229,7 +239,8 @@ If you deploy the frontend first, add its URL to `CLIENT_URL` on the backend aft
 
 ## Known limitations
 
-- Hackathon data is entered by hand in `seed/hackathons.js` (with `source` and `lastChecked` fields), not fetched live. Deadlines go out of date, so the list needs to be refreshed and re-seeded.
+- Automatic sync covers Devpost only, and only online hackathons. Unstop entries are still added by hand. I could not test the Devpost call from my development environment, so run `npm run sync` once after deploying and check the output.
+- The list shows at most 6 hackathons, so search and filters only look inside the open ones, not an archive.
 - `GET /api/teams` is public and includes member names and emails. This should be restricted.
 - There is no rate limiting. `POST /hackathons/recommend` is public and runs the embedding model, so it could be abused.
 - The JWT is kept in `localStorage`, which is simple but exposed to XSS.
@@ -244,7 +255,8 @@ If you deploy the frontend first, add its URL to `CLIENT_URL` on the backend aft
 - Pagination and server-side filtering for projects
 - Bookmark hackathons and get deadline reminders
 - A profile page with skills and GitHub links
-- A simple way to refresh the hackathon list without editing the seed file
+- More hackathon sources, such as Unstop or Devfolio, if they offer an API or permission
+- Separate start date, registration deadline, prize and eligibility fields (Devpost's list does not provide them)
 - More tests, including API tests that can run in CI against a test database
 
 ## Contributing

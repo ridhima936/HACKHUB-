@@ -28,14 +28,15 @@
     "seed": "node seed/hackathons.js && node seed/generateEmbeddings.js",
     "seed:data": "node seed/hackathons.js",
     "seed:embeddings": "node seed/generateEmbeddings.js",
+    "sync": "node seed/syncHackathons.js",
     "create-index": "node seed/createVectorIndex.js",
     "install:all": "npm install && npm install --prefix frontend",
     "client": "npm run dev --prefix frontend",
     "build:client": "npm run build --prefix frontend",
     "lint:client": "npm run lint --prefix frontend",
     "check": "node scripts/check-syntax.js",
-    "test": "node tests/vector.test.js",
-    "test:unit": "node tests/vector.test.js",
+    "test": "node tests/vector.test.js && node tests/devpost.test.js",
+    "test:unit": "node tests/vector.test.js && node tests/devpost.test.js",
     "test:api": "node tests/smoke.test.js"
   },
   "engines": {

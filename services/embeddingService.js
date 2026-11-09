@@ -3,8 +3,7 @@ const EMBEDDING_DIMENSIONS = 384;
 
 let extractorPromise = null;
 
-// @xenova/transformers is ESM-friendly; load lazily so the server boots fast
-// and so environments that never touch the RAG endpoint (e.g. CI) stay light.
+// Loaded lazily so the server starts fast and CI never downloads the model.
 const getExtractor = async () => {
     if (!extractorPromise) {
         extractorPromise = (async () => {

@@ -43,7 +43,7 @@ const joinTeam = async (req, res) => {
         await team.save();
 
         res.json({ message: "Joined team successfully", team });
-    } catch (error) {
+    } catch {
         res.status(500).json({ message: "Failed to join team" });
     }
 };
@@ -68,7 +68,7 @@ const leaveTeam = async (req, res) => {
         await team.save();
 
         res.json({ message: "Left team successfully", team });
-    } catch (error) {
+    } catch {
         res.status(500).json({ message: "Failed to leave team" });
     }
 };
@@ -81,7 +81,7 @@ const getTeams = async (req, res) => {
             .populate("members", "name email");
 
         res.json(teams);
-    } catch (error) {
+    } catch {
         res.status(500).json({ message: "Failed to fetch teams" });
     }
 };

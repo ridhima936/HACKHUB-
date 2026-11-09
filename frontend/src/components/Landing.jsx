@@ -90,7 +90,7 @@ function Landing({ onLogin, onRegister }) {
                     <p className="form-error" role="alert">{error}</p>
                 ) : hackathons.length === 0 ? (
                     <p className="landing-note">
-                        No hackathons loaded yet. Run <code>npm run seed</code> on the backend to fill the archive.
+                        No open hackathons right now. Check back soon.
                     </p>
                 ) : (
                     <>

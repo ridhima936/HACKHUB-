@@ -56,7 +56,7 @@ const hackathonSchema = new mongoose.Schema(
             required: true
         },
 
-        // Where the record came from and when it was last verified by hand.
+        // Where the record came from and when it was last refreshed.
         source: {
             type: String,
             default: "Unstop"

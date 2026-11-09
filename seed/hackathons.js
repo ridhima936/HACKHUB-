@@ -1,12 +1,6 @@
-// Seeds the hackathon archive with real, currently-open hackathons from Unstop.
-//
-// These entries were collected from unstop.com in October 2026. Each `officialUrl`
-// points at the actual competition page, so "Register on Unstop" opens the real event.
-// Re-run `npm run seed` after updating the list; then run `npm run seed:embeddings`
-// to rebuild the embeddings used by the recommender.
-//
-// Every record has a `source` + `lastChecked` field so it is clear the data was
-// curated by hand rather than scraped live.
+// Hand-curated hackathons from Unstop (source: "Unstop"). Each officialUrl is the
+// real competition page. Re-running `npm run seed` replaces only these records;
+// hackathons synced from Devpost are left alone.
 require("dotenv").config({ quiet: true });
 const mongoose = require("mongoose");
 const Hackathon = require("../models/Hackathon");
@@ -116,7 +110,7 @@ const seedHackathons = async () => {
 
     try {
         await mongoose.connect(process.env.MONGO_URI);
-        const removed = await Hackathon.deleteMany();
+        const removed = await Hackathon.deleteMany({ source: UNSTOP });
         await Hackathon.insertMany(hackathons);
 
         console.log(`Seeded ${hackathons.length} real Unstop hackathons (removed ${removed.deletedCount} old records).`);

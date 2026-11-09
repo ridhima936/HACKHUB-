@@ -96,19 +96,23 @@ const check = (name, cond, extra = "") => {
 
     console.log("HACKATHONS + RAG");
     r = await call("GET", "/hackathons");
-    check("list hackathons", r.status === 200 && r.data.length > 0 && !("embedding" in r.data[0]));
+    check("list hackathons", r.status === 200 && Array.isArray(r.data) && r.data.every((h) => !("embedding" in h)));
+    check("at most 6 hackathons are listed", r.data.length <= 6);
+    check("only open hackathons are listed", r.data.every((h) => !h.deadline || new Date(h.deadline) >= new Date(new Date().toISOString().slice(0, 10))));
     const hid = r.data[0]?._id;
-    r = await call("GET", `/hackathons/${hid}`);
-    check("hackathon details", r.status === 200);
+    if (hid) {
+        r = await call("GET", `/hackathons/${hid}`);
+        check("hackathon details", r.status === 200);
+    }
     r = await call("POST", "/hackathons/recommend", { body: { techStack: [] } });
     check("recommend validates empty input", r.status === 400);
     r = await call("POST", "/hackathons/recommend", { body: { techStack: ["React", "Node.js", "MongoDB"] } });
-    check("recommend returns ranked results", r.status === 200 && r.data.recommendations?.length > 0, `(status ${r.status}: ${r.data?.message})`);
-    if (r.status === 200) {
+    check("recommend responds", r.status === 200, `(status ${r.status}: ${r.data?.message})`);
+    if (r.status === 200 && r.data.recommendations.length > 0) {
         const recs = r.data.recommendations;
         check("recommend reports search method", ["atlas-vector-search", "local-cosine"].includes(r.data.method));
         check("recommend reports embedding model", typeof r.data.model === "string" && r.data.model.length > 0);
-        check("recommend reports embedded doc count", Number(r.data.total) > 0);
+        check("recommend reports open doc count", Number(r.data.total) > 0);
         check("recommendations are sorted by score", recs.every((x, i) => i === 0 || recs[i - 1].score >= x.score));
         check("recommendations never leak embeddings", recs.every((x) => !("embedding" in x)));
         console.log(`        method=${r.data.method} model=${r.data.model} top="${recs[0]?.name}" score=${recs[0]?.score?.toFixed(3)}`);

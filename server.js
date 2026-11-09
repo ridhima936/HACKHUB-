@@ -4,6 +4,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const connectDB = require("./config/db");
 const { preloadModel } = require("./services/embeddingService");
+const { startAutoSync } = require("./services/hackathonSync");
 
 const authRoutes = require("./routes/authRoutes");
 const projectRoutes = require("./routes/projectRoutes");
@@ -16,7 +17,7 @@ if (!process.env.JWT_SECRET) {
 }
 
 const app = express();
-// Do not advertise the framework.
+
 app.disable("x-powered-by");
 
 // Allow a comma-separated list of frontends (local dev + deployed URL).
@@ -85,6 +86,7 @@ connectDB().then(() => {
     const server = app.listen(PORT, () => {
         console.log(`HackHub server running on port ${PORT}`);
         if (process.env.PRELOAD_MODEL !== "false") preloadModel();
+        startAutoSync();
     });
 
     // Close cleanly so Docker/Render restarts do not drop in-flight requests.

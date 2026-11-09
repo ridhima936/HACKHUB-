@@ -22,8 +22,10 @@ jobs:
       - name: Syntax check
         run: node scripts/check-syntax.js
 
-      - name: Unit tests (RAG vector math)
-        run: node tests/vector.test.js
+      - name: Unit tests
+        run: |
+          node tests/vector.test.js
+          node tests/devpost.test.js
 
   frontend:
     name: Frontend (lint + build)

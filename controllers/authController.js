@@ -84,7 +84,7 @@ const getMe = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
         res.json({ user });
-    } catch (error) {
+    } catch {
         res.status(500).json({ message: "Failed to fetch user" });
     }
 };
